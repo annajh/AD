@@ -3,6 +3,14 @@ from sklearn.mixture import GMM
 from sklearn import svm
 import random
 import warnings
+import sys
+
+#A class to raise error messages
+class ValidationError(Exception):
+	def _init_(self,message):
+		self.message = message
+	def _str_(selfself):
+		return repr(self.message)
 
 def load_data(control_file, dementia_file):
 	"""
@@ -91,6 +99,18 @@ def split_train_test(X,Y,subjectID,**kwargs):
 	for index in testIndex:
 		X_test.append(X[index])
 		Y_test.append(Y[index])
+	#check training set, testing set is not empty
+	try:
+		if X_train == []:
+			raise ValidationError('training data is empty!')
+		if X_test == []:
+			raise ValidationError('testing data is empty!')
+	except ValidationError as e:
+		print e.message
+		sys.exit(1)
+	#if more testing data than training data
+	if len(X_test)> len(X_train):
+		warnings.warn('training data size is less than testing data!')
 	#return
 	return np.array(X_train), Y_train, np.array(X_test), Y_test, trainID, testID
 
@@ -104,7 +124,7 @@ if __name__ == "__main__":
 	#covar_type = 'spherical'  # the only type I've learned (or remembered learning) tbh
 
 	# split training and testing data
-	split_train_test(X,Y,subjectID,trainID =subjectID)
+	split_train_test(X,Y,subjectID)
 
 	#model = GMM(n_components=1, covariance_type=covar_type)
 	#model.fit(X_control)
