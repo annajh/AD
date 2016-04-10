@@ -4,7 +4,7 @@ import warnings
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import MaxAbsScaler
+from sklearn.preprocessing import MinMaxScaler
 
 
 #A class to raise error messages
@@ -118,6 +118,6 @@ def split_train_test(X,Y,subjectID,**kwargs):
 
 #normalize all feature vectors
 def normalize_features(X):
-    min_max_scaler = MaxAbsScaler()
+    min_max_scaler = MinMaxScaler()
     X_train_minmax = min_max_scaler.fit_transform(X)
     return X_train_minmax

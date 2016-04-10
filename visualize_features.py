@@ -10,14 +10,14 @@ def plot_1d(X_train, Y_train):
     print Y_train
     for y in Y_train:
         if y == 0:
-            ctr.append(X_train[count][1])
+            ctr.append(X_train[count][12])
         else:
-            alz.append(X_train[count][1])
+            alz.append(X_train[count][12])
         count = count + 1
     print ctr
     print alz
-    plt.title('feature 1- BI')
-    #plt.axis([0.02, 0.1, -1, 2])
+    plt.title('feature 12- min_diff_f1f2')
+    plt.axis([0, 1, -1, 2])
     plt.plot(ctr,len(ctr)*[0], 'x',color = 'red')
     plt.plot(alz,len(alz)*[1], 'x',color = 'blue')
     plt.show()
