@@ -9,17 +9,14 @@ if __name__ == "__main__":
 	# get useful features
 	X = data.get_useful_features_mat(X)
 
-	X_testing = np.array([[1.22354785408e-92, -1.,  2.],
-                    	[ 3.78725178547e-43,  0.,  0.],
-                    	[ 1.50844307291e-66,  1., -1.]])
-	X_testing_2 = data.normalize_features(X_testing)
-	print X_testing_2
-
 	#normalize features
 	print X
 	X_scaled = data.normalize_features(X)
 	print X_scaled
 
+	#PCA
+	pca, covariance_kept, covariance_after, explained_variance_ratio_ = data.reduce_dimension(X_scaled)
+	print explained_variance_ratio_, covariance_kept, covariance_after
 	# split training and testing data
 	X_train, Y_train, X_test, Y_test, trainID, testID = data.split_train_test(X_scaled,Y,subjectID)
 

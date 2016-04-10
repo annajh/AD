@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA, RandomizedPCA
 
 
 #A class to raise error messages
@@ -121,3 +122,18 @@ def normalize_features(X):
     min_max_scaler = MinMaxScaler()
     X_train_minmax = min_max_scaler.fit_transform(X)
     return X_train_minmax
+
+#types:default,  randomized
+def reduce_dimension(X, type = 'default'):
+    if type == 'default':
+        pca = PCA(n_components = 3)
+    elif type == 'randomized':
+        pca = RandomizedPCA(n_components = 3)
+    else:
+        raise TypeError('type can only be "default" or "randomized"')
+    pca.fit(X)
+    covariance_before = pca.get_covariance()
+    pca.transform(X)
+    covariance_after = pca.get_covariance()
+    covariance_kept = covariance_after/covariance_before
+    return pca, covariance_kept, covariance_after, pca.explained_variance_ratio_
