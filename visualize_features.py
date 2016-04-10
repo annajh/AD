@@ -44,7 +44,7 @@ def plot_3d(X_train, y_train):
     alz = np.array(alz)
 
     plt.title('Data Distribution after PCA')
-    
+
     ax.scatter(ctr[:, 0], ctr[:, 1], ctr[:, 2], c='b', cmap=plt.cm.spectral)
     ax.scatter(alz[:, 0], alz[:, 1], alz[:, 2], c='r', cmap=plt.cm.spectral)
 
