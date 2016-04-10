@@ -3,6 +3,8 @@ import random
 import warnings
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import normalize
 
 
 #A class to raise error messages
@@ -79,7 +81,7 @@ def split_train_test(X,Y,subjectID,**kwargs):
 	trainID = subjectID[:]
 	for ID in testID:
 		trainID.remove(ID)
-	print trainID, testID
+	#print trainID, testID
 	#get the list of indices in X,Y,subjectID from trainID and testID
 	trainIndex = []
 	testIndex = []
@@ -87,7 +89,7 @@ def split_train_test(X,Y,subjectID,**kwargs):
 		trainIndex.append(subjectID.index(train))
 	for test in testID:
 		testIndex.append(subjectID.index(test))
-	print trainIndex, testIndex
+	#print trainIndex, testIndex
 	#according to indices, create X_train, Y_train, X_test, Y_test
 	X_train = []
 	Y_train = []
@@ -113,3 +115,8 @@ def split_train_test(X,Y,subjectID,**kwargs):
 		warnings.warn('training data size is less than testing data!')
 	#return
 	return np.array(X_train), Y_train, np.array(X_test), Y_test, trainID, testID
+
+#normalize all feature vectors
+def normalize_features(X):
+    normalize(X, axis = 0, copy = False)
+    return X
