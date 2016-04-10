@@ -132,8 +132,4 @@ def reduce_dimension(X, type = 'default'):
     else:
         raise TypeError('type can only be "default" or "randomized"')
     pca.fit(X)
-    covariance_before = pca.get_covariance()
-    pca.transform(X)
-    covariance_after = pca.get_covariance()
-    covariance_kept = covariance_after/covariance_before
-    return pca, covariance_kept, covariance_after, pca.explained_variance_ratio_
+    return pca, pca.explained_variance_ratio_, pca.transform(X)

@@ -10,25 +10,27 @@ if __name__ == "__main__":
 	X = data.get_useful_features_mat(X)
 
 	#normalize features
-	print X
+	#print X
 	X_scaled = data.normalize_features(X)
-	print X_scaled
+	#print X_scaled
 
 	#PCA
-	pca, covariance_kept, covariance_after, explained_variance_ratio_ = data.reduce_dimension(X_scaled)
-	print explained_variance_ratio_, covariance_kept, covariance_after
+	pca, explained_variance_ratio_, X_scaled_reduced = data.reduce_dimension(X_scaled)
+	print explained_variance_ratio_, pca
 	# split training and testing data
-	X_train, Y_train, X_test, Y_test, trainID, testID = data.split_train_test(X_scaled,Y,subjectID)
+	X_train, Y_train, X_test, Y_test, trainID, testID = data.split_train_test(X_scaled_reduced,Y,subjectID)
 
 	#SVM
 	clf = SVM.train(X_train,Y_train)
 	#print X_train, Y_train
 	#print clf
-	#print SVM.test(X_test,clf)
-	#print Y_test
+	print SVM.test(X_test,clf)
+	print Y_test
 	#SVM.plot(clf,X_train,Y_train)
 
-	visualize_features.plot_1d(X_train,Y_train)
+	#visualize features
+	#visualize_features.plot_1d(X_train,Y_train)
+
 	#GMM
 	# Add parameters as needed
 	#comp_range = [1,2,3,5]  # hyperparameter, try different number of mixture components
