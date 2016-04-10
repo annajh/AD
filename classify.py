@@ -20,6 +20,9 @@ if __name__ == "__main__":
 	# split training and testing data
 	X_train, Y_train, X_test, Y_test, trainID, testID = data.split_train_test(X_scaled_reduced,Y,subjectID)
 
+	#plot out data 3D
+	visualize_features.plot_3d(X_scaled_reduced, Y)
+
 	#SVM
 	clf = SVM.train(X_train,Y_train)
 	#print X_train, Y_train
