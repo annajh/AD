@@ -60,8 +60,8 @@ class Example(tk.Frame):
         self.scrollbarAlz.config(command=self.dataAlz.yview)
         self.scrollbarCtr.config(command=self.dataCtr.yview)
 
-        tk.Button(self, text = "Select Directory", borderwidth = 1, command=self.askdirectory).grid(row = 10, column = 5)
-        tk.Button(self, text = "Select Directory", borderwidth = 1).grid(row = 10, column = 6)
+        tk.Button(self, text = "Select Directory", borderwidth = 1, command=self.askdirectoryAlz).grid(row = 10, column = 5)
+        tk.Button(self, text = "Select Directory", borderwidth = 1, command=self.askdirectoryCtr).grid(row = 10, column = 6)
 
         # defining options for opening a directory
         self.dir_opt = options = {}
@@ -70,13 +70,21 @@ class Example(tk.Frame):
         options['parent'] = self
         options['title'] = 'This is a title'
 
-    def askdirectory(self):
+    def askdirectoryAlz(self):
         dirAlz = tkFile.askdirectory(**self.dir_opt)
         #if os.path.isfile(dirAlz):
         for line in os.listdir(dirAlz):
             self.dataAlz.insert(tk.END, line)
             print line
         self.dataAlz.update()
+
+    def askdirectoryCtr(self):
+        dirCtr = tkFile.askdirectory(**self.dir_opt)
+        #if os.path.isfile(dirAlz):
+        for line in os.listdir(dirCtr):
+            self.dataCtr.insert(tk.END, line)
+            print line
+        self.dataCtr.update()
 
     def calculate(self):
         # get the value from the input widget, convert
