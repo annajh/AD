@@ -1,8 +1,11 @@
 __author__ = 'jennytou'
 import Tkinter as tk
 import tkFileDialog as tkFile
+import os
 
 class Example(tk.Frame):
+    dirAlz = ''
+    dirCtr = ''
     def __init__(self, parent):
         classification = tk.IntVar()
         kernel = tk.IntVar()
@@ -10,6 +13,8 @@ class Example(tk.Frame):
         labelText = tk.StringVar()
 
         tk.Frame.__init__(self, parent)
+
+        self.master.title("CogID")
 
         #layout the UI
         tk.Label(self, text = "Classification Method", borderwidth = 1).grid(row = 1, column = 1, columnspan = 4)
@@ -55,12 +60,23 @@ class Example(tk.Frame):
         self.scrollbarAlz.config(command=self.dataAlz.yview)
         self.scrollbarCtr.config(command=self.dataCtr.yview)
 
-        tk.Button(self, text = "Select Directory", borderwidth = 1).grid(row = 10, column = 5)
+        tk.Button(self, text = "Select Directory", borderwidth = 1, command=self.askdirectory).grid(row = 10, column = 5)
         tk.Button(self, text = "Select Directory", borderwidth = 1).grid(row = 10, column = 6)
 
+        # defining options for opening a directory
+        self.dir_opt = options = {}
+        options['initialdir'] = 'C:\\'
+        options['mustexist'] = True
+        options['parent'] = self
+        options['title'] = 'This is a title'
 
-        self.master.title("CogID")
-
+    def askdirectory(self):
+        dirAlz = tkFile.askdirectory(**self.dir_opt)
+        #if os.path.isfile(dirAlz):
+        for line in os.listdir(dirAlz):
+            self.dataAlz.insert(tk.END, line)
+            print line
+        self.dataAlz.update()
 
     def calculate(self):
         # get the value from the input widget, convert
