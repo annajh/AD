@@ -4,6 +4,49 @@ import tkFileDialog as tkFile
 import os
 import pyglet
 from threading import Thread
+import data
+import SVM
+import KNN
+import visualize_features
+import UI
+from sklearn.mixture import GMM
+import numpy as np
+from sklearn import metrics
+
+
+def classify_function(filename, method, k, kernal):
+    X, Y, subjectID = data.load_data("control_features_combinedSubject.txt", "dementia_features_combinedSubject.txt")
+    X = data.get_useful_features_mat(X)
+
+    alz_count = 0
+    for y in Y:
+        if y:
+            alz_count = alz_count + 1
+
+	#normalize features
+	X_scaled = data.normalize_features(X)
+	#print X_scaled
+
+	#PCA
+	pca, explained_variance_ratio_, X_scaled_reduced = data.reduce_dimension(X_scaled)
+
+    print filename
+    testList = []
+    testList.append(filename)
+    X_train, Y_train, X_test, Y_test, trainID, testID = data.split_train_test(X_scaled_reduced,Y,subjectID,testID=testList)
+
+    #SVM
+    if method == 2:
+        #TODO make exception
+        clf = SVM.train(X_train,Y_train,kernal)
+        result = SVM.test(X_test,clf)
+    #KNN
+    elif method == 1:
+        #TODO make exception
+        neigh = KNN.train(X_train,Y_train,k)
+        result = KNN.test(X_test,neigh)
+
+    return result[0], Y_train[0]
 
 class Example(tk.Frame):
     dirAlz = ''
@@ -17,12 +60,46 @@ class Example(tk.Frame):
 
         classification = tk.IntVar()
         kernel = tk.IntVar()
+        sound2 = tk.StringVar()
+        k = 0
+        class_method = 0
+        ker = 0
 
         labelText = tk.StringVar()
+        labelText2 = tk.StringVar()
 
         tk.Frame.__init__(self, parent)
 
         self.master.title("CogID")
+
+        def onselectAlz(evt):
+            w = evt.widget
+            index = self.dataAlz.curselection()
+            sound2.set(w.get(index))
+            #tk.Entry(self, textvariable = sound2).grid(row = 7, column = 1, columnspan = 4, sticky = tk.W)
+            #filename = self.dataAlz.get(self.dataAlz.curselection())[0:3]
+            print sound2
+
+        def classification_method():
+            class_method = classification.get()
+            k = kbox.get()
+            ker = kernel.get()
+            print classification.get()
+            print kbox.get()
+            print ker
+            filename2 = filebox.get()[0:3]
+            print filename2
+            result, truth = classify_function(filename2, class_method, k, ker)
+            print result,truth
+            if result == 0:
+                labelText.set('control')
+            elif result == 1:
+                labelText.set('probably Alzheimers')
+            if result == truth:
+                labelText2.set('correct')
+            elif result != truth:
+                labelText2.set('incorrect')
+
 
         #layout the UI
         tk.Label(self, text = "Classification Method", borderwidth = 1).grid(row = 1, column = 1, columnspan = 4, sticky = tk.W)
@@ -39,24 +116,27 @@ class Example(tk.Frame):
         tk.Label(self, text = "k = ", borderwidth = 1).grid(row = 4, column = 2, sticky = tk.W)
         tk.Label(self, text = "Kernel", borderwidth = 1).grid(row = 5, column = 2, sticky = tk.W)
 
-        tk.Entry(self, width = 3).grid(row = 4, column = 3, columnspan = 1, sticky = tk.W)
+        kbox = tk.Entry(self, width = 3)
+        kbox.grid(row = 4, column = 3, columnspan = 1, sticky = tk.W)
 
         tk.Radiobutton(self, text = "Linear", variable = kernel, value = 1).grid(row = 5, column = 3, sticky = tk.W)
         tk.Radiobutton(self, text = "RBF", variable = kernel, value = 2).grid(row = 5, column = 4, sticky = tk.W)
 
         tk.Label(self, text = "Selected File", borderwidth = 1).grid(row = 6, column = 1, columnspan = 4, sticky = tk.W)
-        tk.Entry(self).grid(row = 7, column = 1, columnspan = 4, sticky = tk.W)
+
+        filebox = tk.Entry(self, textvariable = sound2)
+        filebox.grid(row = 7, column = 1, columnspan = 4, sticky = tk.W)
 
         tk.Button(self, text = "Listen", borderwidth = 1, command = self.listenAlz).grid(row = 8, column = 1, columnspan = 2, sticky = tk.W)
-        tk.Button(self, text = "Classify", borderwidth = 1).grid(row = 8, column = 3, columnspan = 2, sticky = tk.W)
+        tk.Button(self, text = "Classify", borderwidth = 1, command = classification_method).grid(row = 8, column = 3, columnspan = 2, sticky = tk.W)
 
         tk.Label(self, text = "Predicted Label").grid(row = 9, column = 1, columnspan = 2, sticky = tk.W)
         resultLabel = tk.Label(self, textvariable = labelText).grid(row = 9, column = 2, columnspan = 2, sticky = tk.W)
 
-        correctLabel = tk.Label(self, textvariable = labelText).grid(row = 10, column = 1, columnspan = 4, sticky = tk.W)
+        correctLabel = tk.Label(self, textvariable = labelText2).grid(row = 10, column = 1, columnspan = 4, sticky = tk.W)
 
         self.dataAlz = tk.Listbox(self, selectmode = "Single")
-        self.dataAlz.bind('<<ListboxSelect>>',self.onselectAlz)
+        self.dataAlz.bind('<<ListboxSelect>>',onselectAlz)
         self.dataAlz.grid(row = 2, column = 5, rowspan = 8)
         self.dataCtr = tk.Listbox(self, selectmode = "Single")
         self.dataCtr.grid(row = 2, column = 6, rowspan = 8)
@@ -98,24 +178,17 @@ class Example(tk.Frame):
                 #print line
         self.dataCtr.update()
 
-    def onselectAlz(self,evt):
-        w = evt.widget
-        index = self.dataAlz.curselection()
-        sound2 = tk.StringVar()
-        sound2.set(w.get(index))
-        tk.Entry(self, textvariable = sound2).grid(row = 7, column = 1, columnspan = 4, sticky = tk.W)
-        print sound2
 
     def listenAlz(self):
         soundfile = self.dataAlz.get(self.dataAlz.curselection())
-        filename = soundfile[0:5]
+        filename = soundfile[0:3]
         global listen_thread
         listen_thread = Thread(target=startPlaying)
         listen_thread.start()
 
     def listenCtr(self):
         soundfile = self.dataCtr.get(self.dataAlz.curselection())
-        filename = soundfile[0:5]
+        filename = soundfile[0:3]
         global listen_thread
         listen_thread = Thread(target=startPlaying)
         listen_thread.start()

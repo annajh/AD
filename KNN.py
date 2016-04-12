@@ -2,8 +2,8 @@ __author__ = 'jennytou'
 
 from sklearn.neighbors import KNeighborsClassifier
 
-def train(X_train, Y_train):
-    neigh = KNeighborsClassifier(n_neighbors=3)
+def train(X_train, Y_train,k):
+    neigh = KNeighborsClassifier(n_neighbors=int(k))
     neigh.fit(X_train, Y_train)
     return neigh
 

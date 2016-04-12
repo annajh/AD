@@ -8,7 +8,8 @@ import numpy as np
 from sklearn import metrics
 import Tkinter as tk
 
-def cross_validate(X_scaled_reduced, Y, subjectID):
+'''
+def cross_validate(X_scaled_reduced, Y, subjectID, method):
 	# split training and testing data
 	y_pred = []
 	y_true = []
@@ -24,15 +25,17 @@ def cross_validate(X_scaled_reduced, Y, subjectID):
 		#KNN
 		neigh = KNN.train(X_train,Y_train)
 		y_pred.extend(KNN.test(X_test,neigh))
+
 		y_true.extend(Y_test)
 	precision = metrics.precision_score(y_true, y_pred)
 	recall = metrics.recall_score(y_true,y_pred)
 	f1 = metrics.f1_score(y_true,y_pred)
 
 	return precision, recall, f1
-
+'''
 
 if __name__ == "__main__":
+	'''
 	X, Y, subjectID = data.load_data("control_features_combinedSubject.txt", "dementia_features_combinedSubject.txt")
 	X = data.get_useful_features_mat(X)
 
@@ -56,7 +59,8 @@ if __name__ == "__main__":
 	#cross validate
 	precision, recall, f1 = cross_validate(X_scaled_reduced, Y, subjectID)
 
-	print precision, recall, f1
+	#print precision, recall, f1
+	'''
 
 	root = tk.Tk()
 	UI.Example(root).pack(fill="both", expand=True)

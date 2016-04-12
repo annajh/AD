@@ -4,8 +4,12 @@ from sklearn import svm
 import numpy as np
 import matplotlib.pyplot as plt
 
-def train(X_train, Y_train):
-    clf = svm.SVC(kernel='linear')
+def train(X_train, Y_train,kernal):
+    if kernal == 1:
+        ker = 'linear'
+    elif kernal == 2:
+        ker = 'rbf'
+    clf = svm.SVC(kernel=ker)
     clf.fit(X_train,Y_train)
     return clf
 

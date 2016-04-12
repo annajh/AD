@@ -82,6 +82,7 @@ def split_train_test(X,Y,subjectID,**kwargs):
 	if (testID == []):
 		testID = random.sample(subjectID, 1)
 	trainID = subjectID[:]
+	print testID
 	for ID in testID:
 		trainID.remove(ID)
 	#print trainID, testID
