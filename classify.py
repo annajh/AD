@@ -2,9 +2,11 @@ import data
 import SVM
 import KNN
 import visualize_features
+import UI
 from sklearn.mixture import GMM
 import numpy as np
 from sklearn import metrics
+import Tkinter as tk
 
 def cross_validate(X_scaled_reduced, Y, subjectID):
 	# split training and testing data
@@ -55,6 +57,10 @@ if __name__ == "__main__":
 	precision, recall, f1 = cross_validate(X_scaled_reduced, Y, subjectID)
 
 	print precision, recall, f1
+
+	root = tk.Tk()
+	UI.Example(root).pack(fill="both", expand=True)
+	root.mainloop()
 
 	#visualize features
 	#visualize_features.plot_1d(X_train,Y_train)
