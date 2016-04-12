@@ -46,7 +46,7 @@ def classify_function(filename, method, k, kernal):
         neigh = KNN.train(X_train,Y_train,k)
         result = KNN.test(X_test,neigh)
 
-    return result[0], Y_train[0]
+    return result[0], Y_test[0]
 
 class Example(tk.Frame):
     dirAlz = ''

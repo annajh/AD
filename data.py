@@ -129,7 +129,7 @@ def normalize_features(X):
 #types:default,  randomized
 def reduce_dimension(X, type = 'default'):
     if type == 'default':
-        pca = PCA(n_components = 7)
+        pca = PCA(n_components = 3)
     elif type == 'randomized':
         pca = RandomizedPCA(n_components = 5)
     else:
