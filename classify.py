@@ -16,12 +16,12 @@ def cross_validate(X_scaled_reduced, Y, subjectID):
 		X_train, Y_train, X_test, Y_test, trainID, testID = data.split_train_test(X_scaled_reduced,Y,subjectID,testID=testList)
 
 		#SVM
-		clf = SVM.train(X_train,Y_train)
-		y_pred.extend(SVM.test(X_test,clf))
+		#clf = SVM.train(X_train,Y_train)
+		#y_pred.extend(SVM.test(X_test,clf))
 
 		#KNN
-		#neigh = KNN.train(X_train,Y_train)
-		#y_pred.extend(KNN.test(X_test,neigh))
+		neigh = KNN.train(X_train,Y_train)
+		y_pred.extend(KNN.test(X_test,neigh))
 		y_true.extend(Y_test)
 	precision = metrics.precision_score(y_true, y_pred)
 	recall = metrics.recall_score(y_true,y_pred)
@@ -46,13 +46,13 @@ if __name__ == "__main__":
 	#print X_scaled
 
 	#PCA
-	#pca, explained_variance_ratio_, X_scaled_reduced = data.reduce_dimension(X_scaled)
+	pca, explained_variance_ratio_, X_scaled_reduced = data.reduce_dimension(X_scaled)
 
     #plot out data 3D
 	#visualize_features.plot_3d(X_scaled_reduced, Y)
 
 	#cross validate
-	precision, recall, f1 = cross_validate(X_scaled, Y, subjectID)
+	precision, recall, f1 = cross_validate(X_scaled_reduced, Y, subjectID)
 
 	print precision, recall, f1
 

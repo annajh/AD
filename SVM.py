@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def train(X_train, Y_train):
-    clf = svm.SVC(kernel='rbf')
+    clf = svm.SVC(kernel='linear')
     clf.fit(X_train,Y_train)
     return clf
 
