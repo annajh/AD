@@ -12,9 +12,12 @@ import UI
 from sklearn.mixture import GMM
 import numpy as np
 from sklearn import metrics
+import tkMessageBox
 
 
 def classify_function(filename, method, k, kernal):
+    if filename == '':
+        raise data.ValidationError('please select file')
     X, Y, subjectID = data.load_data("control_features_combinedSubject.txt", "dementia_features_combinedSubject.txt")
     X = data.get_useful_features_mat(X)
 
@@ -35,18 +38,23 @@ def classify_function(filename, method, k, kernal):
     testList.append(filename)
     X_train, Y_train, X_test, Y_test, trainID, testID = data.split_train_test(X_scaled_reduced,Y,subjectID,testID=testList)
 
+    if method == 0:
+        raise data.ValidationError('please select classification method')
     #SVM
-    if method == 2:
-        #TODO make exception
+    elif method == 2:
+        if kernal == 0:
+            raise data.ValidationError('please select kernel')
         clf = SVM.train(X_train,Y_train,kernal)
         result = SVM.test(X_test,clf)
     #KNN
     elif method == 1:
-        #TODO make exception
+        if k == '':
+            raise data.ValidationError('please select number of neighbors (k)')
         neigh = KNN.train(X_train,Y_train,k)
         result = KNN.test(X_test,neigh)
 
-    return result[0], Y_train[0]
+    return result[0], Y_test[0]
+
 
 class Example(tk.Frame):
     dirAlz = ''
@@ -61,9 +69,6 @@ class Example(tk.Frame):
         classification = tk.IntVar()
         kernel = tk.IntVar()
         sound2 = tk.StringVar()
-        k = 0
-        class_method = 0
-        ker = 0
 
         labelText = tk.StringVar()
         labelText2 = tk.StringVar()
@@ -89,7 +94,11 @@ class Example(tk.Frame):
             print ker
             filename2 = filebox.get()[0:3]
             print filename2
-            result, truth = classify_function(filename2, class_method, k, ker)
+            try:
+                result, truth = classify_function(filename2, class_method, k, ker)
+            except data.ValidationError as e:
+                tkMessageBox.showinfo("Error Message",e.message)
+                return
             print result,truth
             if result == 0:
                 labelText.set('control')
@@ -130,10 +139,10 @@ class Example(tk.Frame):
         tk.Button(self, text = "Listen", borderwidth = 1, command = self.listenAlz).grid(row = 8, column = 1, columnspan = 2, sticky = tk.W)
         tk.Button(self, text = "Classify", borderwidth = 1, command = classification_method).grid(row = 8, column = 3, columnspan = 2, sticky = tk.W)
 
-        tk.Label(self, text = "Predicted Label").grid(row = 9, column = 1, columnspan = 2, sticky = tk.W)
-        resultLabel = tk.Label(self, textvariable = labelText).grid(row = 9, column = 2, columnspan = 2, sticky = tk.W)
+        tk.Label(self, text = "Predicted Label").grid(row = 9, column = 1, columnspan = 4, sticky = tk.W)
+        resultLabel = tk.Label(self, textvariable = labelText).grid(row = 10, column = 1, columnspan = 4, sticky = tk.W)
 
-        correctLabel = tk.Label(self, textvariable = labelText2).grid(row = 10, column = 1, columnspan = 4, sticky = tk.W)
+        correctLabel = tk.Label(self, textvariable = labelText2).grid(row = 11, column = 1, columnspan = 4, sticky = tk.W)
 
         self.dataAlz = tk.Listbox(self, selectmode = "Single")
         self.dataAlz.bind('<<ListboxSelect>>',onselectAlz)
