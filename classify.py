@@ -59,10 +59,11 @@ if __name__ == "__main__":
 	#print precision, recall, f1
 	'''
 
-	#root = tk.Tk()
-	#UI.Example(root).pack(fill="both", expand=True)
-	#root.mainloop()
+	root = tk.Tk()
+	UI.Example(root).pack(fill="both", expand=True)
+	root.mainloop()
 
+'''
 	#n-fold test
 	#No PCA, SVM, linear
 	cross_validate(2, 0, 1, -1, "No PCA, SVM, linear")
@@ -150,3 +151,4 @@ if __name__ == "__main__":
 
 	#visualize features
 	#visualize_features.plot_1d(X_train,Y_train)
+	'''
