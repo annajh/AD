@@ -15,7 +15,7 @@ from sklearn import metrics
 import tkMessageBox
 
 
-def classify_function(filename, method, k, kernal):
+def classify_function(filename, method, k, kernal,n):
     if filename == '':
         raise data.ValidationError('please select file')
     X, Y, subjectID = data.load_data("control_features_combinedSubject.txt", "dementia_features_combinedSubject.txt")
@@ -27,17 +27,44 @@ def classify_function(filename, method, k, kernal):
             alz_count = alz_count + 1
 
 	#normalize features
-	X_scaled = data.normalize_features(X)
+	X_scaled, normalizer = data.normalize_features(X)
 	#print X_scaled
 
-	#PCA
-	pca, explained_variance_ratio_, X_scaled_reduced = data.reduce_dimension(X_scaled)
 
-    print filename
+    #print filename
     testList = []
-    testList.append(filename)
-    X_train, Y_train, X_test, Y_test, trainID, testID = data.split_train_test(X_scaled_reduced,Y,subjectID,testID=testList)
+    filenameSubj = filename[0:3]
+    testList.append(filenameSubj)
+    try:
+        X_train, Y_train, X_test, Y_test, trainID, testID = data.split_train_test(X_scaled,Y,subjectID,testID=testList)
+    except ValueError:
+        print filenameSubj
+        raise data.ValidationError("combined data missing!")
 
+    #PCA
+    if n < 1 and n != -1:
+        raise data.ValidationError('# features has to be greater than 0')
+    elif n > 16:
+        raise data.ValidationError('# features has to be less than 16')
+    elif (n >= 1 and n <= 16):
+        pca, explained_variance_ratio_ = data.reduce_dimension(X_train, n)
+        X_train = pca.transform(X_train)
+
+    #load the real testing data! Y_test should remain the same!
+    X_test = data.load_testing_visit("control_features_per_visit.txt", "dementia_features_per_visit.txt", filename[0:5])
+    #print "visit"
+    #print X_test
+    X_test = data.get_useful_features_mat(X_test)
+    #print "visit"
+    #print X_test
+    X_test = normalizer.transform(X_test)
+    #print "visit"
+    #print X_test
+    #if use PCA
+    if (n >= 1 and n <= 16):
+        X_test = pca.transform(X_test)
+    #print "visit"
+    #print X_test
     if method == 0:
         raise data.ValidationError('please select classification method')
     #SVM
@@ -46,6 +73,10 @@ def classify_function(filename, method, k, kernal):
             raise data.ValidationError('please select kernel')
         clf = SVM.train(X_train,Y_train,kernal)
         result = SVM.test(X_test,clf)
+        #print X_train
+        #print X_test
+        #print result
+        #print clf
     #KNN
     elif method == 1:
         if k == '':
@@ -57,17 +88,19 @@ def classify_function(filename, method, k, kernal):
 
 
 class Example(tk.Frame):
-    dirAlz = ''
-    dirCtr = ''
-    filename = ''
+
     soundfile = ''
     #player = pyglet.media.Player()
 
 
     def __init__(self, parent):
 
+        dirAlz = ''
+        dirCtr = ''
+
         classification = tk.IntVar()
         kernel = tk.IntVar()
+        PCA = tk.IntVar()
         sound2 = tk.StringVar()
 
         labelText = tk.StringVar()
@@ -77,29 +110,43 @@ class Example(tk.Frame):
 
         self.master.title("CogID")
 
+
+
         def onselectAlz(evt):
             w = evt.widget
             index = self.dataAlz.curselection()
             sound2.set(w.get(index))
             #tk.Entry(self, textvariable = sound2).grid(row = 7, column = 1, columnspan = 4, sticky = tk.W)
             #filename = self.dataAlz.get(self.dataAlz.curselection())[0:3]
-            print sound2
+            #print sound2
+
+        def onselectCtr(evt):
+            w = evt.widget
+            index = self.dataCtr.curselection()
+            sound2.set(w.get(index))
+            #tk.Entry(self, textvariable = sound2).grid(row = 7, column = 1, columnspan = 4, sticky = tk.W)
+            #filename = self.dataAlz.get(self.dataAlz.curselection())[0:3]
+            #print sound2
 
         def classification_method():
             class_method = classification.get()
             k = kbox.get()
             ker = kernel.get()
-            print classification.get()
-            print kbox.get()
-            print ker
-            filename2 = filebox.get()[0:3]
-            print filename2
+            #print classification.get()
+            #print kbox.get()
+            #print ker
+            if PCA.get() == 1:
+                n = int(PCAbox.get())
+            else:
+                n = -1
+            filename = filebox.get()
+            #print filename
             try:
-                result, truth = classify_function(filename2, class_method, k, ker)
+                result, truth = classify_function(filename, class_method, k, ker, n)
             except data.ValidationError as e:
                 tkMessageBox.showinfo("Error Message",e.message)
                 return
-            print result,truth
+            #print result,truth
             if result == 0:
                 labelText.set('control')
             elif result == 1:
@@ -131,23 +178,37 @@ class Example(tk.Frame):
         tk.Radiobutton(self, text = "Linear", variable = kernel, value = 1).grid(row = 5, column = 3, sticky = tk.W)
         tk.Radiobutton(self, text = "RBF", variable = kernel, value = 2).grid(row = 5, column = 4, sticky = tk.W)
 
-        tk.Label(self, text = "Selected File", borderwidth = 1).grid(row = 6, column = 1, columnspan = 4, sticky = tk.W)
+        #tk.Label(self, text = "PCA", borderwidth = 1).grid(row = 6, column = 1, sticky = tk.W)
+        PCAbox = tk.Entry(self, width = 3)
+        PCAbox.configure(state = 'disabled', readonlybackground= 'black')
+        def naccheck():
+            if PCA.get() == 1:
+                PCAbox.configure(state='normal', background= 'white')
+            else:
+                PCAbox.configure(state='disabled', readonlybackground= 'black')
+        On = tk.Checkbutton(self, variable = PCA, text = "PCA", onvalue = 1, offvalue = 0, command = lambda: naccheck())
+        On.grid(row = 6, column = 1, sticky = tk.W)
+
+        PCAbox.grid(row = 6, column = 3, sticky = tk.W)
+
+        tk.Label(self, text = "Selected File", borderwidth = 1).grid(row = 7, column = 1, columnspan = 4, sticky = tk.W)
 
         filebox = tk.Entry(self, textvariable = sound2)
-        filebox.grid(row = 7, column = 1, columnspan = 4, sticky = tk.W)
+        filebox.grid(row = 8, column = 1, columnspan = 4, sticky = tk.W)
 
-        tk.Button(self, text = "Listen", borderwidth = 1, command = self.listenAlz).grid(row = 8, column = 1, columnspan = 2, sticky = tk.W)
-        tk.Button(self, text = "Classify", borderwidth = 1, command = classification_method).grid(row = 8, column = 3, columnspan = 2, sticky = tk.W)
+        tk.Button(self, text = "Listen", borderwidth = 1, command = self.listenAlz).grid(row = 9, column = 1, columnspan = 2, sticky = tk.W)
+        tk.Button(self, text = "Classify", borderwidth = 1, command = classification_method).grid(row = 9, column = 3, columnspan = 2, sticky = tk.W)
 
-        tk.Label(self, text = "Predicted Label").grid(row = 9, column = 1, columnspan = 4, sticky = tk.W)
-        resultLabel = tk.Label(self, textvariable = labelText).grid(row = 10, column = 1, columnspan = 4, sticky = tk.W)
+        tk.Label(self, text = "Predicted Label").grid(row = 10, column = 1, columnspan = 4, sticky = tk.W)
+        resultLabel = tk.Label(self, textvariable = labelText).grid(row = 11, column = 1, columnspan = 4, sticky = tk.W)
 
-        correctLabel = tk.Label(self, textvariable = labelText2).grid(row = 11, column = 1, columnspan = 4, sticky = tk.W)
+        correctLabel = tk.Label(self, textvariable = labelText2).grid(row = 12, column = 1, columnspan = 4, sticky = tk.W)
 
         self.dataAlz = tk.Listbox(self, selectmode = "Single")
         self.dataAlz.bind('<<ListboxSelect>>',onselectAlz)
         self.dataAlz.grid(row = 2, column = 5, rowspan = 8)
         self.dataCtr = tk.Listbox(self, selectmode = "Single")
+        self.dataCtr.bind('<<ListboxSelect>>',onselectCtr)
         self.dataCtr.grid(row = 2, column = 6, rowspan = 8)
 
         self.scrollbarAlz = tk.Scrollbar(self.dataAlz, orient= tk.VERTICAL)

@@ -17,6 +17,32 @@ class ValidationError(Exception):
 	def _str_(selfself):
 		return repr(self.message)
 
+def load_testing_visit(dirAlz, dirCtr, visitname):
+	X = []
+	with open(dirAlz, 'r') as inf_control:
+		for line in inf_control:
+			features_str = line.split()
+			if len(features_str) == 0: continue  # in case there's empty lines in file
+			visit = features_str[0]
+			features = map(float, features_str[1:])
+			if visit != visitname: continue
+			else: X.append(features)
+	inf_control.close()
+
+	with open(dirCtr, 'r') as inf_control:
+		for line in inf_control:
+			features_str = line.split()
+			if len(features_str) == 0: continue  # in case there's empty lines in file
+			#print features_str
+			visit = features_str[0]
+			features = map(float, features_str[1:])
+			if visit != visitname: continue
+			else: X.append(features)
+	inf_control.close()
+
+	return np.array(X)
+
+
 def load_data(control_file, dementia_file):
 	"""
 	Loads feature vectors from file into matrices X and Y
@@ -82,7 +108,8 @@ def split_train_test(X,Y,subjectID,**kwargs):
 	if (testID == []):
 		testID = random.sample(subjectID, 1)
 	trainID = subjectID[:]
-	print testID
+	#print trainID
+	#print testID
 	for ID in testID:
 		trainID.remove(ID)
 	#print trainID, testID
@@ -122,17 +149,18 @@ def split_train_test(X,Y,subjectID,**kwargs):
 
 #normalize all feature vectors
 def normalize_features(X):
-    min_max_scaler = MinMaxScaler()
-    X_train_minmax = min_max_scaler.fit_transform(X)
-    return X_train_minmax
+	min_max_scaler = MinMaxScaler()
+	normalizer = min_max_scaler.fit(X)
+	X_train_minmax = normalizer.transform(X)
+	return X_train_minmax, normalizer
 
 #types:default,  randomized
-def reduce_dimension(X, type = 'default'):
+def reduce_dimension(X, n, type = 'default'):
     if type == 'default':
-        pca = PCA(n_components = 7)
+        pca = PCA(n_components = n)
     elif type == 'randomized':
-        pca = RandomizedPCA(n_components = 5)
+        pca = RandomizedPCA(n_components = n)
     else:
         raise TypeError('type can only be "default" or "randomized"')
     pca.fit(X)
-    return pca, pca.explained_variance_ratio_, pca.transform(X)
+    return pca, pca.explained_variance_ratio_
