@@ -157,10 +157,18 @@ def normalize_features(X):
 #types:default,  randomized
 def reduce_dimension(X, n, type = 'default'):
     if type == 'default':
+<<<<<<< HEAD
         pca = PCA(n_components = n)
+=======
+        pca = PCA(n_components = 3)
+>>>>>>> 77fa75a3f18cf9c0cad7abcd1e755c8a73103904
     elif type == 'randomized':
         pca = RandomizedPCA(n_components = n)
     else:
         raise TypeError('type can only be "default" or "randomized"')
     pca.fit(X)
+<<<<<<< HEAD
     return pca, pca.explained_variance_ratio_
+=======
+    return pca, pca.explained_variance_ratio_, pca.transform(X)
+>>>>>>> 77fa75a3f18cf9c0cad7abcd1e755c8a73103904
